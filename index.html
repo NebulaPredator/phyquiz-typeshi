@@ -1,0 +1,457 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Physics Quiz</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --neon-blue: #00f3ff;
+            --neon-green: #39ff14;
+            --neon-red: #ff0033;
+            --bg-black: #050505;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: var(--bg-black);
+            background-image: 
+                radial-gradient(circle at 50% 50%, rgba(0, 243, 255, 0.05) 0%, transparent 50%);
+            color: #fff;
+            overflow-x: hidden;
+        }
+
+        /* Cyberpunk Title Font */
+        .neon-font {
+            font-family: 'Orbitron', sans-serif;
+            text-transform: uppercase;
+            letter-spacing: 3px;
+        }
+
+        /* Neon Glow Effects */
+        .neon-text-blue {
+            color: var(--neon-blue);
+            text-shadow: 0 0 10px rgba(0, 243, 255, 0.7), 0 0 20px rgba(0, 243, 255, 0.5);
+        }
+
+        .neon-box {
+            background: rgba(10, 10, 10, 0.8);
+            border: 1px solid var(--neon-blue);
+            box-shadow: 0 0 15px rgba(0, 243, 255, 0.2), inset 0 0 10px rgba(0, 243, 255, 0.05);
+            backdrop-filter: blur(10px);
+        }
+
+        /* Start Button Special Style */
+        .start-btn {
+            background: transparent;
+            color: var(--neon-blue);
+            border: 2px solid var(--neon-blue);
+            box-shadow: 0 0 10px var(--neon-blue), inset 0 0 10px var(--neon-blue);
+            transition: all 0.3s ease;
+            font-family: 'Orbitron', sans-serif;
+            text-shadow: 0 0 5px var(--neon-blue);
+        }
+
+        .start-btn:hover {
+            background: var(--neon-blue);
+            color: black;
+            box-shadow: 0 0 30px var(--neon-blue), inset 0 0 20px var(--neon-blue);
+            text-shadow: none;
+            transform: scale(1.05);
+        }
+
+        /* Option Buttons */
+        .option-btn {
+            background: rgba(20, 20, 20, 0.9);
+            border: 1px solid #333;
+            color: #e2e8f0;
+            transition: all 0.2s ease;
+        }
+
+        .option-btn:hover:not(:disabled) {
+            border-color: var(--neon-blue);
+            box-shadow: 0 0 10px rgba(0, 243, 255, 0.4);
+            transform: translateX(5px);
+        }
+
+        /* Correct/Wrong States */
+        .correct-answer {
+            background-color: rgba(57, 255, 20, 0.1) !important;
+            border-color: var(--neon-green) !important;
+            color: var(--neon-green) !important;
+            box-shadow: 0 0 20px rgba(57, 255, 20, 0.4) !important;
+            text-shadow: 0 0 5px rgba(57, 255, 20, 0.8);
+        }
+
+        .wrong-answer {
+            background-color: rgba(255, 0, 51, 0.1) !important;
+            border-color: var(--neon-red) !important;
+            color: var(--neon-red) !important;
+            box-shadow: 0 0 20px rgba(255, 0, 51, 0.4) !important;
+            animation: shake 0.4s;
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-5px); }
+            75% { transform: translateX(5px); }
+        }
+
+        /* Scrollbar */
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: #000; }
+        ::-webkit-scrollbar-thumb { background: #333; border-radius: 3px; }
+        ::-webkit-scrollbar-thumb:hover { background: var(--neon-blue); }
+    </style>
+</head>
+<body class="min-h-screen flex items-center justify-center p-4">
+
+    <!-- Start Screen (Clean & Minimal) -->
+    <div id="start-screen" class="text-center relative z-10">
+        <!-- Optional Minimal Heading (can be removed if you want pure blank + button) -->
+        <h1 class="neon-font text-5xl md:text-7xl mb-12 neon-text-blue tracking-widest">PHYSICS QUIZ</h1>
+        
+        <button onclick="startQuiz()" class="start-btn text-2xl md:text-3xl font-bold py-6 px-16 rounded-lg uppercase tracking-widest">
+            Start Quiz
+        </button>
+    </div>
+
+    <!-- Quiz Container -->
+    <div id="quiz-container" class="hidden max-w-4xl w-full neon-box rounded-xl overflow-hidden relative">
+        <!-- Header -->
+        <div class="p-6 border-b border-gray-800 flex justify-between items-center bg-black/40">
+            <div>
+                <span class="text-gray-500 text-xs font-mono uppercase">System Status</span>
+                <div class="text-xl font-bold neon-font text-white">
+                    Q: <span id="current-q-num" class="text-cyan-400">01</span> / <span id="total-q-num">50</span>
+                </div>
+            </div>
+            <div class="text-right">
+                <span class="text-gray-500 text-xs font-mono uppercase">Score</span>
+                <div class="text-2xl font-bold text-green-400 neon-font" style="text-shadow: 0 0 10px rgba(74, 222, 128, 0.5);" id="score-display">00</div>
+            </div>
+        </div>
+
+        <!-- Progress Bar -->
+        <div class="w-full bg-gray-900 h-1">
+            <div id="progress-bar" class="bg-cyan-400 h-1 transition-all duration-300 shadow-[0_0_10px_#22d3ee]"></div>
+        </div>
+
+        <!-- Content -->
+        <div class="p-6 md:p-10">
+            <div id="question-text-area" class="mb-8 min-h-[100px] flex items-center">
+                <!-- Question injected here -->
+            </div>
+
+            <div id="options-container" class="grid grid-cols-1 gap-4">
+                <!-- Options injected here -->
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <div class="p-4 bg-black/40 border-t border-gray-800 flex justify-end">
+            <button id="next-btn" onclick="nextQuestion()" disabled class="neon-font text-gray-500 cursor-not-allowed border border-gray-700 hover:border-gray-500 px-6 py-2 rounded transition-all uppercase text-sm">
+                Next >>
+            </button>
+        </div>
+    </div>
+
+    <!-- Results Screen -->
+    <div id="result-screen" class="hidden max-w-2xl w-full neon-box rounded-xl p-10 text-center relative z-10">
+        <h2 class="neon-font text-4xl text-white mb-2">SYSTEM HALTED</h2>
+        <div class="text-gray-400 font-mono text-sm mb-8 tracking-widest">QUIZ COMPLETE</div>
+        
+        <div class="inline-block border border-cyan-500/30 p-8 rounded-full mb-8 bg-black/50 shadow-[0_0_30px_rgba(0,243,255,0.1)]">
+            <div class="text-7xl font-bold neon-text-blue neon-font">
+                <span id="final-score">0</span>
+            </div>
+            <div class="text-gray-500 text-sm mt-2">OUT OF 50</div>
+        </div>
+
+        <div id="score-message" class="text-xl text-gray-300 mb-8 font-light"></div>
+
+        <button onclick="restartQuiz()" class="border border-cyan-500 text-cyan-400 hover:bg-cyan-500 hover:text-black font-bold py-3 px-10 rounded uppercase tracking-wider transition-all shadow-[0_0_10px_rgba(0,243,255,0.2)]">
+            Reboot System
+        </button>
+    </div>
+
+    <script>
+        // --- Data ---
+        const arOptions = [
+            "Both Assertion (A) and Reason (R) are true and R is the correct explanation of A",
+            "Both A and R are true but R is not the correct explanation of A",
+            "Assertion is true but Reason is false",
+            "Assertion is false but Reason is true"
+        ];
+
+        const questions = [
+            // MCQs
+            { q: "Which of the following can change the shape of an object?", options: ["Force", "Mass", "Energy", "Speed"], ans: 0 },
+            { q: "SI unit of force is:", options: ["Dyne", "Newton", "Joule", "Pascal"], ans: 1 },
+            { q: "One newton is equal to:", options: ["1 kg m s⁻¹", "1 kg m s⁻²", "1 g cm s⁻²", "1 kg m² s⁻²"], ans: 1 },
+            { q: "Which law of motion gives the definition of force?", options: ["First law", "Second law", "Third law", "Law of gravitation"], ans: 1 },
+            { q: "Newton’s first law of motion is also known as:", options: ["Law of inertia", "Law of momentum", "Law of acceleration", "Law of force"], ans: 0 },
+            { q: "Inertia depends upon:", options: ["Shape of body", "Volume of body", "Mass of body", "Density of body"], ans: 2 },
+            { q: "The tendency of a body to resist change in its state of motion is called:", options: ["Force", "Momentum", "Inertia", "Acceleration"], ans: 2 },
+            { q: "Which has more inertia?", options: ["A stone of 1 kg", "A stone of 5 kg", "A stone of 500 g", "All have same inertia"], ans: 1 },
+            { q: "Momentum is the product of:", options: ["Mass and velocity", "Force and velocity", "Mass and acceleration", "Force and time"], ans: 0 },
+            { q: "SI unit of momentum is:", options: ["kg m s⁻²", "kg m s⁻¹", "N s⁻¹", "m s⁻¹"], ans: 1 },
+            { q: "Change in momentum depends on:", options: ["Force", "Time", "Force and time", "Mass"], ans: 2 },
+            { q: "Which quantity remains conserved in absence of external force?", options: ["Velocity", "Force", "Momentum", "Acceleration"], ans: 2 },
+            { q: "Newton’s third law of motion states that:", options: ["Force is proportional to acceleration", "Every action has an equal and opposite reaction", "Force equals mass × acceleration", "Momentum is conserved"], ans: 1 },
+            { q: "Action and reaction forces act:", options: ["On the same body", "On different bodies", "In the same direction", "At the same point"], ans: 1 },
+            { q: "Which of the following is an example of Newton’s third law?", options: ["Falling of stone", "Walking on ground", "Rolling of ball", "Motion of car"], ans: 1 },
+            { q: "Law of conservation of momentum is derived from:", options: ["First law", "Second law", "Third law", "All laws"], ans: 2 },
+            { q: "If force is zero, acceleration will be:", options: ["Maximum", "Minimum", "Zero", "Infinite"], ans: 2 },
+            { q: "A heavy object and a light object fall with same acceleration because:", options: ["Force is same", "Mass is same", "Acceleration due to gravity is same", "Momentum is same"], ans: 2 },
+            { q: "Which of the following is a contact force?", options: ["Magnetic force", "Gravitational force", "Electrostatic force", "Friction"], ans: 3 },
+            { q: "Friction always acts:", options: ["In direction of motion", "Opposite to motion", "Perpendicular to motion", "Along normal"], ans: 1 },
+            { q: "The momentum of a stationary object is:", options: ["Zero", "Infinite", "Maximum", "Minimum"], ans: 0 },
+            { q: "If velocity is doubled, momentum becomes:", options: ["Half", "Same", "Double", "Four times"], ans: 2 },
+            { q: "A bullet fired from a gun recoils because of:", options: ["Inertia", "Gravity", "Conservation of momentum", "Friction"], ans: 2 },
+            { q: "Which force is responsible for stopping a moving car when brakes are applied?", options: ["Magnetic force", "Gravitational force", "Frictional force", "Electrostatic force"], ans: 2 },
+            { q: "A cricket player moves his hands backward while catching the ball to:", options: ["Increase momentum", "Reduce force", "Increase force", "Increase velocity"], ans: 1 },
+            { q: "When a bus suddenly starts, passengers fall backward due to:", options: ["Inertia of rest", "Inertia of motion", "Inertia of direction", "Force"], ans: 0 },
+            { q: "When a bus suddenly stops, passengers fall forward due to:", options: ["Inertia of rest", "Inertia of motion", "Inertia of direction", "Gravity"], ans: 1 },
+            { q: "Impulse is equal to:", options: ["Force × distance", "Force × time", "Mass × velocity", "Mass × acceleration"], ans: 1 },
+            { q: "The rate of change of momentum is:", options: ["Velocity", "Acceleration", "Force", "Energy"], ans: 2 },
+            { q: "A body of mass 1 kg moving with velocity 5 m/s has momentum:", options: ["5 kg m/s", "1 kg m/s", "10 kg m/s", "0 kg m/s"], ans: 0 },
+            { q: "Which law explains recoil of a gun?", options: ["First law", "Second law", "Third law", "Law of gravitation"], ans: 2 },
+            { q: "Force required to stop a moving object depends on:", options: ["Mass only", "Velocity only", "Time taken", "All of these"], ans: 3 },
+            { q: "Net force on a body is zero. The body will:", options: ["Accelerate", "Move with increasing speed", "Remain at rest or move with uniform velocity", "Stop immediately"], ans: 2 },
+            { q: "Which of the following is a non-contact force?", options: ["Friction", "Tension", "Gravitational force", "Push"], ans: 2 },
+            { q: "A change in speed or direction of motion is caused by:", options: ["Energy", "Force", "Power", "Momentum"], ans: 1 },
+            { q: "Which factor does NOT affect inertia?", options: ["Mass", "Shape", "Amount of matter", "Weight"], ans: 1 },
+            { q: "Greater the mass of a body, greater is its:", options: ["Velocity", "Force", "Inertia", "Acceleration"], ans: 2 },
+            { q: "The SI unit of impulse is:", options: ["N s", "kg m s⁻²", "Joule", "Watt"], ans: 0 },
+            { q: "Which law explains why seat belts are used in cars?", options: ["First law", "Second law", "Third law", "Gravitation"], ans: 0 },
+            { q: "Momentum of a body depends on:", options: ["Mass only", "Velocity only", "Mass and velocity", "Acceleration"], ans: 2 },
+
+            // Assertion Reasoning
+            { 
+                type: 'ar', 
+                assertion: "A person standing in a bus falls backward when the bus suddenly starts.", 
+                reason: "The person’s feet move with the bus while the upper body tends to remain at rest due to inertia.", 
+                options: arOptions,
+                ans: 0 
+            },
+            { 
+                type: 'ar', 
+                assertion: "The momentum of an object increases if its velocity increases.", 
+                reason: "Momentum is the product of mass and velocity.", 
+                options: arOptions,
+                ans: 0 
+            },
+            { 
+                type: 'ar', 
+                assertion: "A heavy stone and a light stone fall with the same acceleration towards the Earth.", 
+                reason: "Acceleration due to gravity is independent of the mass of the object.", 
+                options: arOptions,
+                ans: 0 
+            },
+            { 
+                type: 'ar', 
+                assertion: "When a bullet is fired from a gun, the gun recoils backward.", 
+                reason: "Action and reaction forces act on different bodies.", 
+                options: arOptions,
+                ans: 1 
+            },
+            { 
+                type: 'ar', 
+                assertion: "Friction is always useful in our daily life.", 
+                reason: "Friction opposes the relative motion between two surfaces in contact.", 
+                options: arOptions,
+                ans: 3 
+            },
+            { 
+                type: 'ar', 
+                assertion: "If the net external force acting on a body is zero, the momentum of the body remains constant.", 
+                reason: "According to Newton’s first law, a body continues in its state of rest or uniform motion unless acted upon by an external force.", 
+                options: arOptions,
+                ans: 0 
+            },
+            { 
+                type: 'ar', 
+                assertion: "A cricket player pulls his hands backward while catching a fast-moving ball.", 
+                reason: "This increases the time of contact and reduces the force acting on the hands.", 
+                options: arOptions,
+                ans: 0 
+            },
+            { 
+                type: 'ar', 
+                assertion: "Greater the mass of a body, greater is its inertia.", 
+                reason: "Inertia is the resistance of a body to change its state of motion.", 
+                options: arOptions,
+                ans: 1 
+            },
+            { 
+                type: 'ar', 
+                assertion: "Force is required to keep an object moving with constant velocity.", 
+                reason: "Force is required to change the state of motion of an object.", 
+                options: arOptions,
+                ans: 3 
+            },
+            { 
+                type: 'ar', 
+                assertion: "The law of conservation of momentum is based on Newton’s third law of motion.", 
+                reason: "The total momentum of an isolated system remains constant if no external force acts on it.", 
+                options: arOptions,
+                ans: 1 
+            }
+        ];
+
+        let currentQuestionIndex = 0;
+        let score = 0;
+        let isAnswered = false;
+
+        const startScreen = document.getElementById('start-screen');
+        const quizContainer = document.getElementById('quiz-container');
+        const resultScreen = document.getElementById('result-screen');
+        
+        const currentQNumEl = document.getElementById('current-q-num');
+        const totalQNumEl = document.getElementById('total-q-num');
+        const scoreDisplayEl = document.getElementById('score-display');
+        const progressBarEl = document.getElementById('progress-bar');
+        const questionTextArea = document.getElementById('question-text-area');
+        const optionsContainer = document.getElementById('options-container');
+        const nextBtn = document.getElementById('next-btn');
+
+        function startQuiz() {
+            startScreen.classList.add('hidden');
+            quizContainer.classList.remove('hidden');
+            totalQNumEl.innerText = questions.length;
+            loadQuestion();
+        }
+
+        function loadQuestion() {
+            isAnswered = false;
+            nextBtn.disabled = true;
+            nextBtn.classList.add('cursor-not-allowed', 'text-gray-500');
+            nextBtn.classList.remove('text-cyan-400', 'border-cyan-400', 'hover:bg-cyan-400', 'hover:text-black', 'shadow-[0_0_10px_#22d3ee]');
+            
+            const qData = questions[currentQuestionIndex];
+            
+            // Update counts & progress
+            let currentDisplay = (currentQuestionIndex + 1).toString().padStart(2, '0');
+            currentQNumEl.innerText = currentDisplay;
+            const progress = ((currentQuestionIndex + 1) / questions.length) * 100;
+            progressBarEl.style.width = `${progress}%`;
+
+            // Render Question HTML
+            let qHtml = '';
+            if (qData.type === 'ar') {
+                qHtml = `
+                    <div class="w-full">
+                        <div class="flex items-center mb-4">
+                            <span class="bg-gray-800 text-cyan-400 text-[10px] font-mono border border-cyan-400 px-2 py-1 uppercase tracking-wider mr-2">Mode</span>
+                            <span class="text-sm text-gray-400 font-mono">ASSERTION_REASONING.EXE</span>
+                        </div>
+                        <div class="bg-gray-900/50 p-4 border-l-2 border-cyan-400 mb-3">
+                            <span class="font-bold text-cyan-300">Assertion (A):</span> <span class="text-gray-200">${qData.assertion}</span>
+                        </div>
+                        <div class="bg-gray-900/50 p-4 border-l-2 border-purple-500">
+                            <span class="font-bold text-purple-300">Reason (R):</span> <span class="text-gray-200">${qData.reason}</span>
+                        </div>
+                    </div>
+                `;
+            } else {
+                qHtml = `<h2 class="text-xl md:text-2xl font-semibold text-white leading-relaxed">${qData.q}</h2>`;
+            }
+            questionTextArea.innerHTML = qHtml;
+
+            // Render Options
+            optionsContainer.innerHTML = '';
+            qData.options.forEach((opt, index) => {
+                const btn = document.createElement('button');
+                btn.className = `option-btn w-full text-left p-4 rounded-lg text-lg flex items-center justify-between group`;
+                // Add labels A, B, C, D
+                const labels = ['A', 'B', 'C', 'D'];
+                
+                btn.innerHTML = `
+                    <div class="flex items-center">
+                        <span class="w-8 h-8 flex items-center justify-center bg-black border border-gray-600 text-gray-400 font-mono text-sm mr-4 group-hover:border-cyan-400 group-hover:text-cyan-400 transition-colors">
+                            ${labels[index]}
+                        </span>
+                        <span class="font-light">${opt}</span>
+                    </div>
+                    <i class="fas fa-check-circle opacity-0 transition-opacity"></i>
+                `;
+                btn.onclick = () => checkAnswer(index, btn);
+                optionsContainer.appendChild(btn);
+            });
+        }
+
+        function checkAnswer(selectedIndex, btnElement) {
+            if (isAnswered) return;
+            isAnswered = true;
+
+            const correctIndex = questions[currentQuestionIndex].ans;
+            const allButtons = optionsContainer.children;
+
+            if (selectedIndex === correctIndex) {
+                // Correct
+                score++;
+                scoreDisplayEl.innerText = score.toString().padStart(2, '0');
+                
+                btnElement.classList.add('correct-answer');
+                btnElement.querySelector('.fa-check-circle').classList.remove('opacity-0');
+            } else {
+                // Wrong
+                btnElement.classList.add('wrong-answer');
+                const icon = btnElement.querySelector('.fa-check-circle');
+                icon.classList.remove('fa-check-circle');
+                icon.classList.add('fa-times-circle');
+                icon.classList.remove('opacity-0');
+
+                // Highlight Correct
+                const correctBtn = allButtons[correctIndex];
+                correctBtn.classList.add('correct-answer');
+                correctBtn.querySelector('.fa-check-circle').classList.remove('opacity-0');
+            }
+
+            // Enable Next Button
+            nextBtn.disabled = false;
+            nextBtn.classList.remove('cursor-not-allowed', 'text-gray-500');
+            nextBtn.classList.add('text-cyan-400', 'border-cyan-400', 'hover:bg-cyan-400', 'hover:text-black', 'shadow-[0_0_10px_#22d3ee]');
+            
+            // Disable all buttons
+            Array.from(allButtons).forEach(btn => btn.disabled = true);
+        }
+
+        function nextQuestion() {
+            currentQuestionIndex++;
+            if (currentQuestionIndex < questions.length) {
+                loadQuestion();
+            } else {
+                showResults();
+            }
+        }
+
+        function showResults() {
+            quizContainer.classList.add('hidden');
+            resultScreen.classList.remove('hidden');
+            document.getElementById('final-score').innerText = score.toString().padStart(2, '0');
+            
+            const percentage = (score / questions.length) * 100;
+            const msgEl = document.getElementById('score-message');
+            
+            if (percentage >= 90) msgEl.innerText = "EXCELLENT PERFORMANCE. SYSTEM OPTIMIZED.";
+            else if (percentage >= 70) msgEl.innerText = "GOOD PERFORMANCE. PARAMETERS ACCEPTABLE.";
+            else if (percentage >= 50) msgEl.innerText = "AVERAGE PERFORMANCE. CALIBRATION NEEDED.";
+            else msgEl.innerText = "CRITICAL FAILURE. REVISION REQUIRED.";
+        }
+
+        function restartQuiz() {
+            currentQuestionIndex = 0;
+            score = 0;
+            scoreDisplayEl.innerText = '00';
+            resultScreen.classList.add('hidden');
+            quizContainer.classList.remove('hidden');
+            loadQuestion();
+        }
+    </script>
+</body>
+</html>
